@@ -31,5 +31,3 @@ data = json.loads(response)
 
 for item in data["conversations"]:
     print(item['conversation_id'])
-    print("hello")
-    123
