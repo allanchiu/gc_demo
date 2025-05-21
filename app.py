@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 
 app = Flask(__name__)  # 实例化并命名为app实例
 
@@ -26,7 +26,6 @@ recordApi = PureCloudPlatformClientV2.RecordingApi(apiclient)
 def index():
     return "Hello World!"
 
-
 @app.route("/conversations")
 def get_conversations():
     body = PureCloudPlatformClientV2.ConversationQuery()
@@ -51,9 +50,8 @@ def get_conversations():
         conversation_list = []
         if total_hits > 0:
             for i in range(0, total_hits):
-                conversation_list.append(conversations[i]["conversation_id"])
-            print(conversation_list)
-            return conversation_list
+                conversation_list.append(conversations[i])
+            return render_template("conversation.html", data=conversation_list)
         else:
             return "no conversation"
     except ApiException as e:
@@ -61,7 +59,7 @@ def get_conversations():
 
 
 @app.route("/play_recording")
-def pay_recording():
+def play_recording():
     conversation_id = "b938ff7b-d1d3-4e43-9aaf-f8287c839ed8"  # str | Conversation ID
     max_wait_ms = 5000  # int | The maximum number of milliseconds to wait for the recording to be ready. Must be a positive value. (optional) (default to 5000)
     format_id = "WAV"  # str | The desired media format. Valid values:WAV,WEBM,WAV_ULAW,OGG_VORBIS,OGG_OPUS,MP3,NONE. (optional) (default to 'WEBM')
