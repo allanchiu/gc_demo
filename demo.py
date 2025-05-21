@@ -1,35 +1,25 @@
 import PureCloudPlatformClientV2
-import json
+from PureCloudPlatformClientV2.rest import ApiException
+import time
 
-client_id = "a5208453-0f8c-47f7-a4d7-f7819a82a72c"
-client_secret = "ncusIp3wWDcAFG6MDPFiWUJMdOQ8roudR2k5AhJLND8"
+# 替换为你的客户端ID和客户端密钥
+client_id = '70b17ec8-5475-47fb-b8fe-f8572f4d2b63'
+client_secret = 'r9eNTdKJcHCURIMvDTuQ7b1AyIP8vgWTnwl6KqdjrJUT'
 
-region = PureCloudPlatformClientV2.PureCloudRegionHosts.ap_northeast_1
-PureCloudPlatformClientV2.configuration.host = region.get_api_host()
-apiclient = (
-    PureCloudPlatformClientV2.api_client.ApiClient().get_client_credentials_token(
-        client_id, client_secret
-    )
-)
+# 设置区域为 EUW2（欧洲-西部2）
+environment = 'euw2.pure.cloud'
 
-conv_Api = PureCloudPlatformClientV2.ConversationsApi(apiclient)
+# 创建 API 客户端实例
+api_client = PureCloudPlatformClientV2(api_client=PureCloudPlatformClientV2.ApiClient(environment))
 
-body=PureCloudPlatformClientV2.ConversationQuery()
-body.interval = "2023-07-04T16:00:00.000Z/2023-07-07T16:00:00.000Z"
-Predicate = PureCloudPlatformClientV2.ConversationDetailQueryPredicate()
-CF=PureCloudPlatformClientV2.ConversationDetailQueryFilter()
+# 使用 Client ID 和 Client Secret 设置认证
+api_client.configuration.set_client_credentials(client_id, client_secret)
 
-Predicate.type='metric'
-Predicate.metric='tAnswered'
-Predicate.operator='gt'
-Predicate.value=100000
-CF.predicates.append(Predicate)
-body.conversation_filters.append(CF)
-response = conv_Api.post_analytics_conversations_details_query(body).to_json()
-
-data = json.loads(response)
-
-for item in data["conversations"]:
-    print(item['conversation_id'])
-    print("hello")
-    123
+# 获取 Access Token
+try:
+    response = api_client.oauth.get_client_token()
+    access_token = response.access_token
+    print("Successfully obtained access token:", access_token)
+except ApiException as e:
+    print("Error getting access token:", e)
+    exit(1)
