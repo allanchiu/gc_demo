@@ -41,16 +41,21 @@ def get_conversations():
     segmentFilter.predicates = [predicte01]
     segmentFilter.type = "or"
     body.segment_filters = [segmentFilter]
-    body.interval = "2025-04-10T00:00:00.000Z/2025-04-10T23:59:59.999Z"
+    body.interval = "2025-03-25T00:45:00.000Z/2025-03-25T09:59:59.999Z"
 
     try:
         api_response = conversationApi.post_analytics_conversations_details_query(body)
         response = api_response.to_dict()
         conversations = response["conversations"]
         total_hits = response["total_hits"]
-        for i in range(0, total_hits):
-            print(response["conversations"][i]["conversation_id"])
-        return(conversations)
+        conversation_list = []
+        if total_hits > 0:
+            for i in range(0, total_hits):
+                conversation_list.append(conversations[i]["conversation_id"])
+            print(conversation_list)
+            return conversation_list
+        else:
+            return "no conversation"
     except ApiException as e:
         print("Exception when calling ConversationApi %s\n" % e)
 
