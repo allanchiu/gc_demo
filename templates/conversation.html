@@ -1,21 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<head>
+    <meta charset="UTF-8">
+    <!-- 引入 Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <!-- 引入 Bootstrap JS -->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <title>Conversation Data</title>
+</head>
 
 <body>
-  <button class="btn btn-primary">Click Me</button>
-  <div class="row mb-3 text-center">
-    <div class="col-4 themed-grid-col">conversation_id</div>
-  </div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4 fw-bold">Conversation ID</div>
+            <div class="col-md-4 fw-bold">ANI</div>
+            <div class="col-md-4 fw-bold">DNIS</div>
+        </div>
+        <!-- 循环渲染数据 -->
+        {% for item in data %}
+        <div class="row border-top py-2">
+            <div class="col-md-4"><a href="{{ url_for('play_recording', conversation_id=item.conversation_id) }}">{{
+                    item.conversation_id }}</a>
+            </div>
+            <div class="col-md-4">{{ item.participants[0].sessions[0].ani }}</div>
+            <div class="col-md-4">{{ item.participants[0].sessions[0].dnis }}</div>
+        </div>
+        {% endfor %}
+    </div>
 
-  {% for conv in data %}
-  <div class="row mb-3 text-center">
-    <div class="col-4 themed-grid-col">{{conv.conversation_id}}</div>
-  </div>
-  {% endfor %}
 </body>
-
 
 </html>

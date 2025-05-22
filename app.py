@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, request
 
 app = Flask(__name__)  # 实例化并命名为app实例
 
@@ -60,7 +60,7 @@ def get_conversations():
 
 @app.route("/play_recording")
 def play_recording():
-    conversation_id = "b938ff7b-d1d3-4e43-9aaf-f8287c839ed8"  # str | Conversation ID
+    conversation_id = request.args.get('conversation_id')  # str | Conversation ID
     max_wait_ms = 5000  # int | The maximum number of milliseconds to wait for the recording to be ready. Must be a positive value. (optional) (default to 5000)
     format_id = "WAV"  # str | The desired media format. Valid values:WAV,WEBM,WAV_ULAW,OGG_VORBIS,OGG_OPUS,MP3,NONE. (optional) (default to 'WEBM')
     media_formats = [
