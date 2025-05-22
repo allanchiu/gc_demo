@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import time
 
 app = Flask(__name__)  # 实例化并命名为app实例
 
@@ -25,6 +26,7 @@ recordApi = PureCloudPlatformClientV2.RecordingApi(apiclient)
 @app.route("/")
 def index():
     return "Hello World!"
+
 
 @app.route("/conversations")
 def get_conversations():
@@ -60,7 +62,7 @@ def get_conversations():
 
 @app.route("/play_recording")
 def play_recording():
-    conversation_id = request.args.get('conversation_id')  # str | Conversation ID
+    conversation_id = request.args.get("conversation_id")  # str | Conversation ID
     max_wait_ms = 5000  # int | The maximum number of milliseconds to wait for the recording to be ready. Must be a positive value. (optional) (default to 5000)
     format_id = "WAV"  # str | The desired media format. Valid values:WAV,WEBM,WAV_ULAW,OGG_VORBIS,OGG_OPUS,MP3,NONE. (optional) (default to 'WEBM')
     media_formats = [
@@ -68,16 +70,23 @@ def play_recording():
     ]  # list[str] | All acceptable media formats. Overrides formatId. Valid values:WAV,WEBM,WAV_ULAW,OGG_VORBIS,OGG_OPUS,MP3. (optional)
 
     try:
-        api_response = recordApi.get_conversation_recordings(
-            conversation_id,
-            max_wait_ms=max_wait_ms,
-            format_id=format_id,
-            media_formats=media_formats,
-        )
-        uri = api_response[0].media_uris["0"].media_uri
-        return render_template("recording.html", data=uri)
+        for i in range(0, 2):
+            api_response = recordApi.get_conversation_recordings(
+                conversation_id,
+                max_wait_ms=max_wait_ms,
+                format_id=format_id,
+                media_formats=media_formats,
+            )
+            if api_response != []:
+                uri = api_response[0].media_uris["0"].media_uri
+                return render_template("recording.html", data=uri)
+            time.sleep(3)
+
+        return "no recording"
 
     except ApiException as e:
+        if e.status == 403:
+            return "no recording"
         print(
             "Exception when calling RecordingApi->get_conversation_recordings: %s\n" % e
         )
