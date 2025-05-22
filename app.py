@@ -30,6 +30,7 @@ def index():
 
 @app.route("/conversations")
 def get_conversations():
+    conversation_list = []
     body = PureCloudPlatformClientV2.ConversationQuery()
 
     segmentFilter = PureCloudPlatformClientV2.SegmentDetailQueryFilter()
@@ -42,14 +43,25 @@ def get_conversations():
     segmentFilter.predicates = [predicte01]
     segmentFilter.type = "or"
     body.segment_filters = [segmentFilter]
-    body.interval = "2025-03-25T00:45:00.000Z/2025-03-25T09:59:59.999Z"
+
+    # 获取日期参数
+    start_time = request.args.get('start_time')
+    end_time = request.args.get('end_time')
+
+    if start_time and end_time:
+        # 转换日期格式
+        start_time_iso = start_time + '.000Z'
+        end_time_iso = end_time + '.999Z'
+        body.interval = f"{start_time_iso}/{end_time_iso}"
+    else:
+        # 返回空值
+        return render_template("conversation.html", data=conversation_list)
 
     try:
         api_response = conversationApi.post_analytics_conversations_details_query(body)
         response = api_response.to_dict()
         conversations = response["conversations"]
         total_hits = response["total_hits"]
-        conversation_list = []
         if total_hits > 0:
             for i in range(0, total_hits):
                 conversation_list.append(conversations[i])
@@ -85,7 +97,7 @@ def play_recording():
         return "no recording"
 
     except ApiException as e:
-        if e.status == 403:
+        if e.status == 403 or e.status == 404:
             return "no recording"
         print(
             "Exception when calling RecordingApi->get_conversation_recordings: %s\n" % e
